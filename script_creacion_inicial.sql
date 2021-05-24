@@ -114,7 +114,7 @@ CREATE TABLE [GD1C2021].[gd_esquema].PC
 ALTER TABLE [GD1C2021].[gd_esquema].Ciudad				ADD PRIMARY KEY (ciudad_id)
 
 ALTER TABLE [GD1C2021].[gd_esquema].Sucursal			ADD PRIMARY KEY (sucursal_numero)
-ALTER TABLE [GD1C2021].[gd_esquema].Sucursal			ADD FOREIGN KEY (sucursal_ciudad)		REFERENCES [GD1C2021].[gd_esquema].Ciudad(ciudad_id)
+ALTER TABLE [GD1C2021].[gd_esquema].Sucursal			ADD FOREIGN KEY (sucursal_ciudad)		REFERENCES [GD1C2021].[gd_esquema].Ciudad(ciudad_id) ON DELETE NO ACTION ON UPDATE NO ACTION ;
 
 ALTER TABLE [GD1C2021].[gd_esquema].Factura				ADD PRIMARY KEY (factura_id)
 
@@ -135,9 +135,9 @@ ALTER TABLE [GD1C2021].[gd_esquema].Memoria				ADD PRIMARY KEY (memoria_ram_id)
 ALTER TABLE [GD1C2021].[gd_esquema].Cliente				ADD PRIMARY KEY (cliente_id)
 
 ALTER TABLE [GD1C2021].[gd_esquema].PC					ADD PRIMARY KEY (pc_id)					
-ALTER TABLE [GD1C2021].[gd_esquema].PC					ADD FOREIGN KEY (pc_memoria_ram)		REFERENCES [GD1C2021].[gd_esquema].Memoria(memoria_ram_id)
-ALTER TABLE [GD1C2021].[gd_esquema].PC					ADD FOREIGN KEY (pc_disco_rigido)		REFERENCES [GD1C2021].[gd_esquema].DiscoRigido(disco_rigido_id)
-ALTER TABLE [GD1C2021].[gd_esquema].PC					ADD FOREIGN KEY (pc_microprocesador)	REFERENCES [GD1C2021].[gd_esquema].Microprocesadores(microprocesador_id)
-ALTER TABLE [GD1C2021].[gd_esquema].PC					ADD FOREIGN KEY (pc_placa_video)		REFERENCES [GD1C2021].[gd_esquema].PlacaVideo(placa_video_id)
-ALTER TABLE [GD1C2021].[gd_esquema].PC					ADD FOREIGN KEY (pc_gabinete)			REFERENCES [GD1C2021].[gd_esquema].Gabinete(gabinete_id) 
-ALTER TABLE [GD1C2021].[gd_esquema].PC					ADD FOREIGN KEY (pc_motherboard)		REFERENCES [GD1C2021].[gd_esquema].Motherboard(mother_id)
+ALTER TABLE [GD1C2021].[gd_esquema].PC					ADD FOREIGN KEY (pc_memoria_ram)		REFERENCES [GD1C2021].[gd_esquema].Memoria(memoria_ram_id)					ON DELETE NO ACTION ON UPDATE NO ACTION ;
+ALTER TABLE [GD1C2021].[gd_esquema].PC					ADD FOREIGN KEY (pc_disco_rigido)		REFERENCES [GD1C2021].[gd_esquema].DiscoRigido(disco_rigido_id)				ON DELETE NO ACTION ON UPDATE NO ACTION ;
+ALTER TABLE [GD1C2021].[gd_esquema].PC					ADD FOREIGN KEY (pc_microprocesador)	REFERENCES [GD1C2021].[gd_esquema].Microprocesadores(microprocesador_id)	ON DELETE NO ACTION ON UPDATE NO ACTION ;
+ALTER TABLE [GD1C2021].[gd_esquema].PC					ADD FOREIGN KEY (pc_placa_video)		REFERENCES [GD1C2021].[gd_esquema].PlacaVideo(placa_video_id)				ON DELETE NO ACTION ON UPDATE NO ACTION ;
+ALTER TABLE [GD1C2021].[gd_esquema].PC					ADD FOREIGN KEY (pc_gabinete)			REFERENCES [GD1C2021].[gd_esquema].Gabinete(gabinete_id)					ON DELETE NO ACTION ON UPDATE NO ACTION ;
+ALTER TABLE [GD1C2021].[gd_esquema].PC					ADD FOREIGN KEY (pc_motherboard)		REFERENCES [GD1C2021].[gd_esquema].Motherboard(mother_id)					ON DELETE NO ACTION ON UPDATE NO ACTION ;
