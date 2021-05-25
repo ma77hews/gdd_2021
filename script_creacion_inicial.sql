@@ -228,6 +228,20 @@ CREATE PROCEDURE Insersion_Tabla_Cliente AS
 
 GO
 
+CREATE PROCEDURE Insersion_Tabla_PC AS
+
+	INSERT INTO [GD1C2021].[SELECT_ASTERISCO].PC(pc_codigo,pc_alto,pc_ancho,pc_profundidad,pc_memoria_ram,pc_disco_rigido,pc_microprocesador,pc_placa_video)
+	SELECT	PC_CODIGO,PC_ALTO,PC_ANCHO,PC_PROFUNDIDAD,memoria_ram_id,disco_rigido_id,microprocesador_id,placa_video_id
+	FROM	[GD1C2021].[gd_esquema].Maestra AS MASTERTABLE
+	join	[GD1C2021].[SELECT_ASTERISCO].Memoria on MASTERTABLE.MEMORIA_RAM_CODIGO = Memoria.memoria_ram_codigo
+	join	[GD1C2021].[SELECT_ASTERISCO].DiscoRigido on MASTERTABLE.DISCO_RIGIDO_CODIGO = DiscoRigido.disco_rigido_codigo
+	join	[GD1C2021].[SELECT_ASTERISCO].Microprocesadores on MASTERTABLE.MICROPROCESADOR_CODIGO = Microprocesadores.microprocesador_codigo
+	join	[GD1C2021].[SELECT_ASTERISCO].PlacaVideo on MASTERTABLE.PLACA_VIDEO_MODELO = PlacaVideo.placa_video_modelo
+	GROUP BY PC_CODIGO,PC_ALTO,PC_ANCHO,PC_PROFUNDIDAD,memoria_ram_id,disco_rigido_id,microprocesador_id,placa_video_id
+
+
+GO
+
 -------------------------------- procedure migracion ---------------------------------------------------------------- 
 CREATE PROCEDURE Migracion AS 
 	
@@ -240,6 +254,7 @@ CREATE PROCEDURE Migracion AS
 	EXEC Insersion_Tabla_Disco_Rigido
 	EXEC Insersion_Tabla_Memoria
 	EXEC Insersion_Tabla_Cliente
+	EXEC Insersion_Tabla_PC
 
 GO
 -------------------------------- procedures para reseteos de tablas -------------------------------------------------
@@ -258,6 +273,7 @@ CREATE PROCEDURE Reseteo_Tablas AS
 	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Memoria')IS NOT NULL)				DROP TABLE GD1C2021.SELECT_ASTERISCO.Memoria
 	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Cliente')IS NOT NULL)				DROP TABLE GD1C2021.SELECT_ASTERISCO.Cliente
 
+
 GO
 
 CREATE PROCEDURE Reseteo_Procedures AS
@@ -273,6 +289,7 @@ CREATE PROCEDURE Reseteo_Procedures AS
 	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Insersion_Tabla_Disco_Rigido' AND type = 'p')		DROP PROCEDURE dbo.Insersion_Tabla_Disco_Rigido
 	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Insersion_Tabla_Memoria' AND type = 'p')			DROP PROCEDURE dbo.Insersion_Tabla_Memoria
 	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Insersion_Tabla_Cliente' AND type = 'p')			DROP PROCEDURE dbo.Insersion_Tabla_Cliente
+	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Insersion_Tabla_PC' AND type = 'p')					DROP PROCEDURE dbo.Insersion_Tabla_PC
 	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Migracion' AND type = 'p')							DROP PROCEDURE dbo.Migracion
 	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Reseteo_Tablas' AND type = 'p')						DROP PROCEDURE dbo.Reseteo_Tablas
 	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Reseteo_Procedures' AND type = 'p')					DROP PROCEDURE dbo.Reseteo_Procedures
