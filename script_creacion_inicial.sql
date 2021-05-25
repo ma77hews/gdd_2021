@@ -1,5 +1,4 @@
-CREATE SCHEMA SELECT_ASTERISCO
-GO
+
 -- procedure creacion de tablas --
 CREATE PROCEDURE Creacion_de_Tablas	AS
 
@@ -215,12 +214,20 @@ CREATE PROCEDURE Reseteo AS
 
 GO
 
-
+-- procedure principal, si se toca f5 para iniciar y ya habia algo creado hay que tocar f5 2 veces porque tira un error que no supe sacar( consulta a los ayudantes) pero funciona de 10 sin contar esa falopeada
 CREATE PROCEDURE Play AS 
-
+	IF EXISTS (SELECT * FROM   sys.schemas WHERE  NAME = 'SELECT_ASTERISCO')
+	BEGIN 
+		EXEC Reseteo
+		DROP SCHEMA SELECT_ASTERISCO
+	END
+	ELSE
+	BEGIN
+		EXEC ('create schema SELECT_ASTERISCO')
 		EXEC Creacion_de_Tablas
 		EXEC PK_Y_FK
 		EXEC Migracion
+	END
 	
 GO
 
