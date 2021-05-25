@@ -1,6 +1,5 @@
 CREATE SCHEMA SELECT_ASTERISCO
 GO
-
 -- procedure creacion de tablas --
 CREATE PROCEDURE Creacion_de_Tablas	AS
 
@@ -152,18 +151,18 @@ CREATE PROCEDURE PK_Y_FK AS
 	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].PC					ADD FOREIGN KEY (pc_motherboard)		REFERENCES [GD1C2021].[SELECT_ASTERISCO].Motherboard(mother_id)					ON DELETE NO ACTION ON UPDATE NO ACTION ;
 GO
 
-CREATE PROCEDURE Tabla_Ciudad AS
+CREATE PROCEDURE Insercion_Tabla_Ciudad AS
 	INSERT INTO [GD1C2021].[SELECT_ASTERISCO].Ciudad
-	SELECT		gd_esquema.Maestra.CIUDAD 
-	FROM		gd_esquema.Maestra
-	GROUP BY	gd_esquema.Maestra.CIUDAD
+	SELECT		[GD1C2021].gd_esquema.Maestra.CIUDAD 
+	FROM		[GD1C2021].gd_esquema.Maestra
+	GROUP BY	[GD1C2021].gd_esquema.Maestra.CIUDAD
 GO
 
-CREATE PROCEDURE Tabla_Sucursal AS
+CREATE PROCEDURE Insercion_Tabla_Sucursal AS
 	INSERT INTO [GD1C2021].[SELECT_ASTERISCO].Sucursal (sucursal_direccion, sucursal_mail,sucursal_tel, sucursal_ciudad)(
 	SELECT		SUCURSAL_DIR, SUCURSAL_MAIL, SUCURSAL_TEL,Ciudad.ciudad_id
-	FROM		gd_esquema.Maestra
-	join		[SELECT_ASTERISCO].Ciudad on [SELECT_ASTERISCO].Ciudad.ciudad_descripcion = gd_esquema.Maestra.CIUDAD
+	FROM		[GD1C2021].gd_esquema.Maestra
+	join		[SELECT_ASTERISCO].Ciudad on [SELECT_ASTERISCO].[Ciudad].ciudad_descripcion = [GD1C2021].[gd_esquema].Maestra.CIUDAD
 	GROUP BY	SUCURSAL_DIR, SUCURSAL_MAIL, SUCURSAL_TEL,Ciudad.ciudad_id
 	);
 GO
@@ -172,20 +171,57 @@ GO
 -- procedure migracion -- 
 CREATE PROCEDURE Migracion AS 
 	
-	EXEC Tabla_Ciudad
-	EXEC Tabla_Sucursal
+	EXEC Insercion_Tabla_Ciudad
+	EXEC Insercion_Tabla_Sucursal
 
+GO
+
+CREATE PROCEDURE Reseteo_Tablas AS 
+	
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.PC')IS NOT NULL)					DROP TABLE GD1C2021.SELECT_ASTERISCO.PC
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Sucursal')IS NOT NULL)				DROP TABLE GD1C2021.SELECT_ASTERISCO.Sucursal
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Ciudad')IS NOT NULL)				DROP TABLE GD1C2021.SELECT_ASTERISCO.Ciudad
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Factura')IS NOT NULL)				DROP TABLE GD1C2021.SELECT_ASTERISCO.Factura
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Accesorio')IS NOT NULL)			DROP TABLE GD1C2021.SELECT_ASTERISCO.Accesorio
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Microprocesadores')IS NOT NULL)	DROP TABLE GD1C2021.SELECT_ASTERISCO.Microprocesadores
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Motherboard')IS NOT NULL)			DROP TABLE GD1C2021.SELECT_ASTERISCO.Motherboard
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Gabinete')IS NOT NULL)				DROP TABLE GD1C2021.SELECT_ASTERISCO.Gabinete
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.PlacaVideo')IS NOT NULL)			DROP TABLE GD1C2021.SELECT_ASTERISCO.PlacaVideo
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.DiscoRigido')IS NOT NULL)			DROP TABLE GD1C2021.SELECT_ASTERISCO.DiscoRigido
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Memoria')IS NOT NULL)				DROP TABLE GD1C2021.SELECT_ASTERISCO.Memoria
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Cliente')IS NOT NULL)				DROP TABLE GD1C2021.SELECT_ASTERISCO.Cliente
 
 GO
 
 
-
-CREATE PROCEDURE play AS 
-
-	EXEC Creacion_de_Tablas;
-	EXEC PK_Y_FK;
-	EXEC Migracion;
+CREATE PROCEDURE Reseteo_Procedures AS
+	
+	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Creacion_de_Tablas' AND type = 'p')			DROP PROCEDURE dbo.Creacion_de_Tablas
+	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'PK_Y_FK' AND type = 'p')					DROP PROCEDURE dbo.PK_Y_FK
+	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Insercion_Tabla_Ciudad' AND type = 'p')		DROP PROCEDURE dbo.Insercion_Tabla_Ciudad
+	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Insercion_Tabla_Sucursal' AND type = 'p')	DROP PROCEDURE dbo.Insercion_Tabla_Sucursal
+	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Migracion' AND type = 'p')					DROP PROCEDURE dbo.Migracion
+	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Reseteo_Tablas' AND type = 'p')				DROP PROCEDURE dbo.Reseteo_Tablas
+	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Reseteo_Procedures' AND type = 'p')			DROP PROCEDURE dbo.Reseteo_Procedures
+	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Reseteo' AND type = 'p')					DROP PROCEDURE dbo.Reseteo
+	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Play' AND type = 'p')						DROP PROCEDURE dbo.Play
 
 GO
 
-EXEC play
+CREATE PROCEDURE Reseteo AS
+	
+	EXEC Reseteo_Tablas
+	EXEC Reseteo_Procedures
+
+GO
+
+
+CREATE PROCEDURE Play AS 
+
+		EXEC Creacion_de_Tablas
+		EXEC PK_Y_FK
+		EXEC Migracion
+	
+GO
+
+EXEC Play
