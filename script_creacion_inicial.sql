@@ -20,7 +20,8 @@ CREATE PROCEDURE Creacion_de_Tablas	AS
 	(
 		factura_id			INT IDENTITY,
 		factura_numero		DECIMAL(18,0), 
-		factura_fecha		DATETIME2(3) 
+		factura_fecha		DATETIME2(3),
+		factura_cliente		INT,
 	);
 
 	CREATE TABLE [GD1C2021].[SELECT_ASTERISCO].Accesorio 
@@ -112,6 +113,21 @@ CREATE PROCEDURE Creacion_de_Tablas	AS
 		pc_gabinete					INT,
 		pc_motherboard				INT
 	);
+
+	CREATE TABLE [GD1C2021].[SELECT_ASTERISCO].Compra 
+	(
+		compra_id			INT IDENTITY,
+		--compra_cliente		INT,
+		compra_sucursal		INT,
+		--compra_factura		INT,
+		compra_pc_codigo	INT,
+		compra_accesorio	INT,
+		compra_numero		DECIMAL(18,2),
+		compra_fecha		DATETIME2(3),
+		compra_precio		DECIMAL(18,2),
+		compra_cantidad		DECIMAL(18,0),
+
+	);
 GO
 -------------------------------- procedure para agregar las PK y FK ---------------------------------------------------
 CREATE PROCEDURE PK_Y_FK AS 
@@ -120,8 +136,11 @@ CREATE PROCEDURE PK_Y_FK AS
 
 	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Sucursal				ADD PRIMARY KEY (sucursal_numero)
 	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Sucursal				ADD FOREIGN KEY (sucursal_ciudad)		REFERENCES [GD1C2021].[SELECT_ASTERISCO].Ciudad(ciudad_id) ON DELETE NO ACTION ON UPDATE NO ACTION ;
+	
+	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Cliente				ADD PRIMARY KEY (cliente_id)
 
 	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Factura				ADD PRIMARY KEY (factura_id)
+	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Factura				ADD FOREIGN KEY (factura_cliente)		REFERENCES [GD1C2021].[SELECT_ASTERISCO].Cliente(cliente_id)		ON DELETE NO ACTION ON UPDATE NO ACTION ;
 
 	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Accesorio				ADD PRIMARY KEY (accesorio_id)
 
@@ -137,8 +156,6 @@ CREATE PROCEDURE PK_Y_FK AS
 
 	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Memoria				ADD PRIMARY KEY (memoria_ram_id)
 
-	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Cliente				ADD PRIMARY KEY (cliente_id)
-
 	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].PC					ADD PRIMARY KEY (pc_id)					
 	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].PC					ADD FOREIGN KEY (pc_memoria_ram)		REFERENCES [GD1C2021].[SELECT_ASTERISCO].Memoria(memoria_ram_id)				ON DELETE NO ACTION ON UPDATE NO ACTION ;
 	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].PC					ADD FOREIGN KEY (pc_disco_rigido)		REFERENCES [GD1C2021].[SELECT_ASTERISCO].DiscoRigido(disco_rigido_id)			ON DELETE NO ACTION ON UPDATE NO ACTION ;
@@ -146,6 +163,13 @@ CREATE PROCEDURE PK_Y_FK AS
 	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].PC					ADD FOREIGN KEY (pc_placa_video)		REFERENCES [GD1C2021].[SELECT_ASTERISCO].PlacaVideo(placa_video_id)				ON DELETE NO ACTION ON UPDATE NO ACTION ;
 	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].PC					ADD FOREIGN KEY (pc_gabinete)			REFERENCES [GD1C2021].[SELECT_ASTERISCO].Gabinete(gabinete_id)					ON DELETE NO ACTION ON UPDATE NO ACTION ;
 	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].PC					ADD FOREIGN KEY (pc_motherboard)		REFERENCES [GD1C2021].[SELECT_ASTERISCO].Motherboard(mother_id)					ON DELETE NO ACTION ON UPDATE NO ACTION ;
+
+	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Compra					ADD PRIMARY KEY (compra_id)					
+	--ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Compra					ADD FOREIGN KEY (compra_cliente)		REFERENCES [GD1C2021].[SELECT_ASTERISCO].Cliente(cliente_id)		ON DELETE NO ACTION ON UPDATE NO ACTION ;
+	--ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Compra					ADD FOREIGN KEY (compra_factura)		REFERENCES [GD1C2021].[SELECT_ASTERISCO].Factura(factura_id)		ON DELETE NO ACTION ON UPDATE NO ACTION ;
+	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Compra					ADD FOREIGN KEY (compra_pc_codigo)		REFERENCES [GD1C2021].[SELECT_ASTERISCO].PC(pc_id)				ON DELETE NO ACTION ON UPDATE NO ACTION ;
+	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Compra					ADD FOREIGN KEY (compra_accesorio)		REFERENCES [GD1C2021].[SELECT_ASTERISCO].Accesorio(accesorio_id)	ON DELETE NO ACTION ON UPDATE NO ACTION ;
+	
 GO
 -------------------------------- procedures para realizar las migraciones de las tablas -------------------------------- 
 CREATE PROCEDURE Insercion_Tabla_Ciudad AS 
@@ -160,17 +184,17 @@ CREATE PROCEDURE Insercion_Tabla_Sucursal AS
 	INSERT INTO [GD1C2021].[SELECT_ASTERISCO].Sucursal (sucursal_direccion, sucursal_mail,sucursal_tel, sucursal_ciudad)
 	SELECT		SUCURSAL_DIR, SUCURSAL_MAIL, SUCURSAL_TEL,Ciudad.ciudad_id
 	FROM		[GD1C2021].[gd_esquema].Maestra AS MAESTRA
-	join		[SELECT_ASTERISCO].Ciudad on [SELECT_ASTERISCO].[Ciudad].ciudad_descripcion = MAESTRA.CIUDAD
+	join		[GD1C2021].[SELECT_ASTERISCO].Ciudad on [SELECT_ASTERISCO].[Ciudad].ciudad_descripcion = MAESTRA.CIUDAD
 	GROUP BY	SUCURSAL_DIR, SUCURSAL_MAIL, SUCURSAL_TEL,Ciudad.ciudad_id
 
 GO
 
-CREATE PROCEDURE Insersion_Tabla_Factura AS 
+CREATE PROCEDURE Insersion_Tabla_Cliente AS
 
-	INSERT INTO [GD1C2021].[SELECT_ASTERISCO].Factura(factura_numero,factura_fecha)                                                                                                                                                                                                                       
-	SELECT		FACTURA_NUMERO,FACTURA_FECHA
-	FROM		[GD1C2021].[gd_esquema].Maestra 
-	GROUP BY	FACTURA_NUMERO,FACTURA_FECHA
+	INSERT INTO		[GD1C2021].[SELECT_ASTERISCO].Cliente(cliente_apellido,cliente_nombre,cliente_direccion,cliente_dni,cliente_fecha_nacimiento,cliente_mail,cliente_telefono)
+	SELECT			CLIENTE_APELLIDO,CLIENTE_NOMBRE,CLIENTE_DIRECCION,CLIENTE_DNI,CLIENTE_FECHA_NACIMIENTO,CLIENTE_MAIL,CLIENTE_TELEFONO
+	FROM			[GD1C2021].[gd_esquema].Maestra
+	GROUP BY		CLIENTE_APELLIDO,CLIENTE_NOMBRE,CLIENTE_DIRECCION,CLIENTE_DNI,CLIENTE_FECHA_NACIMIENTO,CLIENTE_MAIL,CLIENTE_TELEFONO
 
 GO
 
@@ -219,12 +243,13 @@ CREATE PROCEDURE Insersion_Tabla_Memoria AS
 
 GO
 
-CREATE PROCEDURE Insersion_Tabla_Cliente AS
+CREATE PROCEDURE Insersion_Tabla_Factura AS 
 
-	INSERT INTO		[GD1C2021].[SELECT_ASTERISCO].Cliente(cliente_apellido,cliente_nombre,cliente_direccion,cliente_dni,cliente_fecha_nacimiento,cliente_mail,cliente_telefono)
-	SELECT			CLIENTE_APELLIDO,CLIENTE_NOMBRE,CLIENTE_DIRECCION,CLIENTE_DNI,CLIENTE_FECHA_NACIMIENTO,CLIENTE_MAIL,CLIENTE_TELEFONO
-	FROM			[GD1C2021].[gd_esquema].Maestra
-	GROUP BY		CLIENTE_APELLIDO,CLIENTE_NOMBRE,CLIENTE_DIRECCION,CLIENTE_DNI,CLIENTE_FECHA_NACIMIENTO,CLIENTE_MAIL,CLIENTE_TELEFONO
+	INSERT INTO [GD1C2021].[SELECT_ASTERISCO].Factura(factura_numero,factura_fecha)                                                                                                                                                                                                                       
+	SELECT		FACTURA_NUMERO,FACTURA_FECHA
+	FROM		[GD1C2021].[gd_esquema].Maestra AS MASTERTABLE
+	join		[GD1C2021].[SELECT_ASTERISCO].Cliente on MASTERTABLE.CLIENTE_APELLIDO = Cliente.cliente_apellido and MASTERTABLE.CLIENTE_DNI = cliente.cliente_dni
+	GROUP BY	FACTURA_NUMERO,FACTURA_FECHA
 
 GO
 
@@ -239,8 +264,31 @@ CREATE PROCEDURE Insersion_Tabla_PC AS
 	join	[GD1C2021].[SELECT_ASTERISCO].PlacaVideo on MASTERTABLE.PLACA_VIDEO_MODELO = PlacaVideo.placa_video_modelo
 	GROUP BY PC_CODIGO,PC_ALTO,PC_ANCHO,PC_PROFUNDIDAD,memoria_ram_id,disco_rigido_id,microprocesador_id,placa_video_id
 
+GO
+CREATE PROCEDURE Insersion_Tabla_Compra_PCS AS
+	
+	INSERT INTO [GD1C2021].[SELECT_ASTERISCO].Compra(compra_numero,compra_fecha,compra_precio,compra_cantidad,compra_sucursal,compra_pc_codigo)
+		SELECT		COMPRA_NUMERO,COMPRA_FECHA,COMPRA_PRECIO,COMPRA_CANTIDAD,sucursal.sucursal_numero,PC.pc_id
+		FROM		[GD1C2021].[gd_esquema].Maestra AS MASTERTABLE
+		join		[GD1C2021].[SELECT_ASTERISCO].Sucursal on MASTERTABLE.SUCURSAL_DIR = Sucursal.sucursal_direccion and MASTERTABLE.SUCURSAL_MAIL = Sucursal.sucursal_mail
+		join		[GD1C2021].[SELECT_ASTERISCO].PC on MASTERTABLE.PC_CODIGO = PC.pc_codigo
+		WHERE		(COMPRA_NUMERO is not null) or (COMPRA_FECHA is not null) and (COMPRA_PRECIO is not null) and (COMPRA_CANTIDAD is not null) and (sucursal.sucursal_numero is not null) and (PC.pc_id is not null)
+		group by	COMPRA_NUMERO,COMPRA_FECHA,COMPRA_PRECIO,COMPRA_CANTIDAD,sucursal_numero,PC.pc_id
 
 GO
+
+CREATE PROCEDURE Insersion_Tabla_Compra_Accesorios AS
+	
+	INSERT INTO [GD1C2021].[SELECT_ASTERISCO].Compra(compra_numero,compra_fecha,compra_precio,compra_cantidad,compra_sucursal,compra_accesorio)
+		SELECT		COMPRA_NUMERO,COMPRA_FECHA,COMPRA_PRECIO,COMPRA_CANTIDAD,sucursal.sucursal_numero,accesorio_id
+		FROM		[GD1C2021].[gd_esquema].Maestra AS MASTERTABLE
+		join		[GD1C2021].[SELECT_ASTERISCO].Sucursal on MASTERTABLE.SUCURSAL_DIR = Sucursal.sucursal_direccion and MASTERTABLE.SUCURSAL_MAIL = Sucursal.sucursal_mail
+		join		[GD1C2021].[SELECT_ASTERISCO].Accesorio on MASTERTABLE.ACCESORIO_CODIGO = Accesorio.accesorio_codigo
+		WHERE		(COMPRA_NUMERO is not null) or (COMPRA_FECHA is not null) and (COMPRA_PRECIO is not null) and (COMPRA_CANTIDAD is not null) and (sucursal.sucursal_numero is not null) and (accesorio_id is not null)
+		group by	COMPRA_NUMERO,COMPRA_FECHA,COMPRA_PRECIO,COMPRA_CANTIDAD,sucursal_numero,accesorio_id
+
+GO
+
 
 -------------------------------- procedure migracion ---------------------------------------------------------------- 
 CREATE PROCEDURE Migracion AS 
@@ -248,32 +296,33 @@ CREATE PROCEDURE Migracion AS
 	EXEC Insercion_Tabla_Ciudad
 	EXEC Insercion_Tabla_Sucursal
 	EXEC Insersion_Tabla_Accesorio
+	EXEC Insersion_Tabla_Cliente
 	EXEC Insersion_Tabla_Factura
 	EXEC Insersion_Tabla_Microprocesadores
 	EXEC Insersion_Tabla_Placa_Video
 	EXEC Insersion_Tabla_Disco_Rigido
 	EXEC Insersion_Tabla_Memoria
-	EXEC Insersion_Tabla_Cliente
 	EXEC Insersion_Tabla_PC
-
+	EXEC Insersion_Tabla_Compra_PCS
+	EXEC Insersion_Tabla_Compra_Accesorios
 GO
 -------------------------------- procedures para reseteos de tablas -------------------------------------------------
 CREATE PROCEDURE Reseteo_Tablas AS 
 	
-	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.PC')IS NOT NULL)					DROP TABLE GD1C2021.SELECT_ASTERISCO.PC
-	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Sucursal')IS NOT NULL)				DROP TABLE GD1C2021.SELECT_ASTERISCO.Sucursal
-	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Ciudad')IS NOT NULL)				DROP TABLE GD1C2021.SELECT_ASTERISCO.Ciudad
-	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Factura')IS NOT NULL)				DROP TABLE GD1C2021.SELECT_ASTERISCO.Factura
-	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Accesorio')IS NOT NULL)			DROP TABLE GD1C2021.SELECT_ASTERISCO.Accesorio
-	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Microprocesadores')IS NOT NULL)	DROP TABLE GD1C2021.SELECT_ASTERISCO.Microprocesadores
-	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Motherboard')IS NOT NULL)			DROP TABLE GD1C2021.SELECT_ASTERISCO.Motherboard
-	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Gabinete')IS NOT NULL)				DROP TABLE GD1C2021.SELECT_ASTERISCO.Gabinete
-	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.PlacaVideo')IS NOT NULL)			DROP TABLE GD1C2021.SELECT_ASTERISCO.PlacaVideo
-	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.DiscoRigido')IS NOT NULL)			DROP TABLE GD1C2021.SELECT_ASTERISCO.DiscoRigido
-	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Memoria')IS NOT NULL)				DROP TABLE GD1C2021.SELECT_ASTERISCO.Memoria
-	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Cliente')IS NOT NULL)				DROP TABLE GD1C2021.SELECT_ASTERISCO.Cliente
-
-
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Cliente')IS NOT NULL)				DROP TABLE [GD1C2021].[SELECT_ASTERISCO].Compra 
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.PC')IS NOT NULL)					DROP TABLE [GD1C2021].[SELECT_ASTERISCO].PC
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Sucursal')IS NOT NULL)				DROP TABLE [GD1C2021].[SELECT_ASTERISCO].Sucursal
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Ciudad')IS NOT NULL)				DROP TABLE [GD1C2021].[SELECT_ASTERISCO].Ciudad
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Factura')IS NOT NULL)				DROP TABLE [GD1C2021].[SELECT_ASTERISCO].Factura
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Accesorio')IS NOT NULL)			DROP TABLE [GD1C2021].[SELECT_ASTERISCO].Accesorio
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Microprocesadores')IS NOT NULL)	DROP TABLE [GD1C2021].[SELECT_ASTERISCO].Microprocesadores
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Motherboard')IS NOT NULL)			DROP TABLE [GD1C2021].[SELECT_ASTERISCO].Motherboard
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Gabinete')IS NOT NULL)				DROP TABLE [GD1C2021].[SELECT_ASTERISCO].Gabinete
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.PlacaVideo')IS NOT NULL)			DROP TABLE [GD1C2021].[SELECT_ASTERISCO].PlacaVideo
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.DiscoRigido')IS NOT NULL)			DROP TABLE [GD1C2021].[SELECT_ASTERISCO].DiscoRigido
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Memoria')IS NOT NULL)				DROP TABLE [GD1C2021].[SELECT_ASTERISCO].Memoria
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Cliente')IS NOT NULL)				DROP TABLE [GD1C2021].[SELECT_ASTERISCO].Cliente
+	IF (OBJECT_ID('GD1C2021.SELECT_ASTERISCO.Compra')IS NOT NULL)				DROP TABLE [GD1C2021].[SELECT_ASTERISCO].Compra
 GO
 
 CREATE PROCEDURE Reseteo_Procedures AS
@@ -290,6 +339,8 @@ CREATE PROCEDURE Reseteo_Procedures AS
 	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Insersion_Tabla_Memoria' AND type = 'p')			DROP PROCEDURE dbo.Insersion_Tabla_Memoria
 	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Insersion_Tabla_Cliente' AND type = 'p')			DROP PROCEDURE dbo.Insersion_Tabla_Cliente
 	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Insersion_Tabla_PC' AND type = 'p')					DROP PROCEDURE dbo.Insersion_Tabla_PC
+	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Insersion_Tabla_Compra_PCS' AND type = 'p')			DROP PROCEDURE dbo.Insersion_Tabla_Compra_PCS
+	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Insersion_Tabla_Compra_Accesorios' AND type = 'p')	DROP PROCEDURE dbo.Insersion_Tabla_Compra_Accesorios
 	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Migracion' AND type = 'p')							DROP PROCEDURE dbo.Migracion
 	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Reseteo_Tablas' AND type = 'p')						DROP PROCEDURE dbo.Reseteo_Tablas
 	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Reseteo_Procedures' AND type = 'p')					DROP PROCEDURE dbo.Reseteo_Procedures
@@ -315,6 +366,7 @@ CREATE PROCEDURE Play AS
 	END
 	ELSE
 	BEGIN
+		EXEC ('use [GD1C2021]')
 		EXEC ('create schema SELECT_ASTERISCO')
 		EXEC Creacion_de_Tablas
 		EXEC PK_Y_FK
