@@ -22,6 +22,7 @@ CREATE PROCEDURE Creacion_de_Tablas	AS
 		factura_numero		DECIMAL(18,0), 
 		factura_fecha		DATETIME2(3),
 		factura_cliente		INT,
+		factura_accesorio	INT,
 	);
 
 	CREATE TABLE [GD1C2021].[SELECT_ASTERISCO].Accesorio 
@@ -117,9 +118,7 @@ CREATE PROCEDURE Creacion_de_Tablas	AS
 	CREATE TABLE [GD1C2021].[SELECT_ASTERISCO].Compra 
 	(
 		compra_id			INT IDENTITY,
-		--compra_cliente		INT,
 		compra_sucursal		INT,
-		--compra_factura		INT,
 		compra_pc_codigo	INT,
 		compra_accesorio	INT,
 		compra_numero		DECIMAL(18,2),
@@ -139,10 +138,11 @@ CREATE PROCEDURE PK_Y_FK AS
 	
 	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Cliente				ADD PRIMARY KEY (cliente_id)
 
-	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Factura				ADD PRIMARY KEY (factura_id)
-	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Factura				ADD FOREIGN KEY (factura_cliente)		REFERENCES [GD1C2021].[SELECT_ASTERISCO].Cliente(cliente_id)		ON DELETE NO ACTION ON UPDATE NO ACTION ;
-
 	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Accesorio				ADD PRIMARY KEY (accesorio_id)
+
+	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Factura				ADD PRIMARY KEY (factura_id)
+	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Factura				ADD FOREIGN KEY (factura_cliente)		REFERENCES [GD1C2021].[SELECT_ASTERISCO].Cliente(cliente_id)			ON DELETE NO ACTION ON UPDATE NO ACTION ;
+	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Factura				ADD FOREIGN KEY (factura_accesorio)		REFERENCES [GD1C2021].[SELECT_ASTERISCO].Accesorio(accesorio_id)		ON DELETE NO ACTION ON UPDATE NO ACTION ;
 
 	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Microprocesadores		ADD PRIMARY KEY (microprocesador_id)
 
@@ -165,8 +165,6 @@ CREATE PROCEDURE PK_Y_FK AS
 	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].PC					ADD FOREIGN KEY (pc_motherboard)		REFERENCES [GD1C2021].[SELECT_ASTERISCO].Motherboard(mother_id)					ON DELETE NO ACTION ON UPDATE NO ACTION ;
 
 	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Compra					ADD PRIMARY KEY (compra_id)					
-	--ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Compra					ADD FOREIGN KEY (compra_cliente)		REFERENCES [GD1C2021].[SELECT_ASTERISCO].Cliente(cliente_id)		ON DELETE NO ACTION ON UPDATE NO ACTION ;
-	--ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Compra					ADD FOREIGN KEY (compra_factura)		REFERENCES [GD1C2021].[SELECT_ASTERISCO].Factura(factura_id)		ON DELETE NO ACTION ON UPDATE NO ACTION ;
 	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Compra					ADD FOREIGN KEY (compra_pc_codigo)		REFERENCES [GD1C2021].[SELECT_ASTERISCO].PC(pc_id)				ON DELETE NO ACTION ON UPDATE NO ACTION ;
 	ALTER TABLE [GD1C2021].[SELECT_ASTERISCO].Compra					ADD FOREIGN KEY (compra_accesorio)		REFERENCES [GD1C2021].[SELECT_ASTERISCO].Accesorio(accesorio_id)	ON DELETE NO ACTION ON UPDATE NO ACTION ;
 	
@@ -243,13 +241,22 @@ CREATE PROCEDURE Insersion_Tabla_Memoria AS
 
 GO
 
-CREATE PROCEDURE Insersion_Tabla_Factura AS 
+CREATE PROCEDURE Insersion_Tabla_Factura_Cliente AS 
 
-	INSERT INTO [GD1C2021].[SELECT_ASTERISCO].Factura(factura_numero,factura_fecha)                                                                                                                                                                                                                       
-	SELECT		FACTURA_NUMERO,FACTURA_FECHA
+	INSERT INTO [GD1C2021].[SELECT_ASTERISCO].Factura(factura_numero,factura_fecha,factura_cliente)                                                                                                                                                                                                                
+	SELECT		FACTURA_NUMERO,FACTURA_FECHA,cliente_id
 	FROM		[GD1C2021].[gd_esquema].Maestra AS MASTERTABLE
 	join		[GD1C2021].[SELECT_ASTERISCO].Cliente on MASTERTABLE.CLIENTE_APELLIDO = Cliente.cliente_apellido and MASTERTABLE.CLIENTE_DNI = cliente.cliente_dni
-	GROUP BY	FACTURA_NUMERO,FACTURA_FECHA
+	GROUP BY	FACTURA_NUMERO,FACTURA_FECHA,cliente_id
+
+GO
+CREATE PROCEDURE Insersion_Tabla_Factura_Accesorio AS 
+
+	INSERT INTO [GD1C2021].[SELECT_ASTERISCO].Factura(factura_numero,factura_fecha,factura_accesorio)                                                                                                                                                                                                                       
+	SELECT		FACTURA_NUMERO,FACTURA_FECHA,accesorio_id
+	FROM		[GD1C2021].[gd_esquema].Maestra AS MASTERTABLE
+	join		[GD1C2021].[SELECT_ASTERISCO].Accesorio on MASTERTABLE.ACCESORIO_CODIGO = Accesorio.accesorio_codigo
+	GROUP BY	FACTURA_NUMERO,FACTURA_FECHA,accesorio_id
 
 GO
 
@@ -297,7 +304,8 @@ CREATE PROCEDURE Migracion AS
 	EXEC Insercion_Tabla_Sucursal
 	EXEC Insersion_Tabla_Accesorio
 	EXEC Insersion_Tabla_Cliente
-	EXEC Insersion_Tabla_Factura
+	EXEC Insersion_Tabla_Factura_Cliente
+	EXEC Insersion_Tabla_Factura_Accesorio
 	EXEC Insersion_Tabla_Microprocesadores
 	EXEC Insersion_Tabla_Placa_Video
 	EXEC Insersion_Tabla_Disco_Rigido
@@ -332,7 +340,8 @@ CREATE PROCEDURE Reseteo_Procedures AS
 	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Insercion_Tabla_Ciudad' AND type = 'p')				DROP PROCEDURE dbo.Insercion_Tabla_Ciudad
 	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Insercion_Tabla_Sucursal' AND type = 'p')			DROP PROCEDURE dbo.Insercion_Tabla_Sucursal
 	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Insersion_Tabla_Accesorio' AND type = 'p')			DROP PROCEDURE dbo.Insersion_Tabla_Accesorio
-	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Insersion_Tabla_Factura' AND type = 'p')			DROP PROCEDURE dbo.Insersion_Tabla_Factura
+	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Insersion_Tabla_Factura_Accesorio' AND type = 'p')	DROP PROCEDURE dbo.Insersion_Tabla_Factura_Accesorio
+	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Insersion_Tabla_Factura_Cliente' AND type = 'p')	DROP PROCEDURE dbo.Insersion_Tabla_Factura_Cliente
 	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Insersion_Tabla_Microprocesadores' AND type = 'p')	DROP PROCEDURE dbo.Insersion_Tabla_Microprocesadores
 	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Insersion_Tabla_Placa_Video' AND type = 'p')		DROP PROCEDURE dbo.Insersion_Tabla_Placa_Video
 	IF EXISTS (SELECT * FROM  sys.procedures WHERE  NAME = 'Insersion_Tabla_Disco_Rigido' AND type = 'p')		DROP PROCEDURE dbo.Insersion_Tabla_Disco_Rigido
