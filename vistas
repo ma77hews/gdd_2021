@@ -1,0 +1,73 @@
+----------------------------
+---------VISTAS-------------
+----------------------------
+
+CREATE VIEW  [SELECT_ASTERISCO].[V_Compra_de_PC] 
+AS
+SELECT 
+	   [compra_id]
+      ,[compra_fecha]
+	  ,compra_precio
+      ,SUM ([compra_cantidad]) AS Cantidad_comprada
+	  ,SUM (compra_precio) / SUM ([compra_cantidad]) as Promedio_Precio_Compra
+
+ FROM [SELECT_ASTERISCO].[Compra] -- o BI_COMPRA si hacemos una nueva tabla para las BI
+
+
+ group by  [compra_id]
+      ,[compra_fecha] 
+	  ,compra_precio
+	  ;
+	  GO
+
+
+CREATE VIEW [SELECT_ASTERISCO].[V_Venta_de_PC] AS
+SELECT 
+	   [factura_id]
+      ,[factura_fecha]
+      ,SUM ([factura_cantidad]) AS Cantidad_Vendida
+	  ,SUM ([factura_precio]) / SUM ([factura_cantidad]) as Promedio_Precio_Venta ---Necesito agregar un campo factura precio para que funcione
+
+ FROM [SELECT_ASTERISCO].[Factura] V
+
+ group by  [factura_id]
+      ,[factura_fecha] 
+	  ;
+GO
+
+CREATE VIEW [SELECT_ASTERISCO].[V_Ganancia_Por_Sucursal_Por_Mes] AS 
+
+SELECT 
+Ven.Sucursal,
+Ven.Fecha,
+Ven.Ventas - Com.Compras AS Ganancias
+FROM 
+(
+SELECT 
+	   [factura_id] AS Sucursal 
+      ,[factura_fecha] as Fecha
+	  ,SUM (isnull ([factura_precio] , 0)) as Ventas --Si es null que sume 0
+
+ FROM [SELECT_ASTERISCO].[Factura] ven
+ 
+ group by  [factura_id]
+      ,[factura_fecha] ) ven
+
+ 
+ inner join 
+ (
+ SELECT 
+	   [compra_id] as Sucursal
+      ,[compra_fecha] as Fecha
+     ,SUM (compra_precio) as Compras
+
+ FROM [SELECT_ASTERISCO].[Compra] 
+
+
+ group by  [compra_id]
+      ,[compra_fecha] 
+) Com
+on ven.SUCURSAL = com.SUCURSAL
+and ven.FECHA = com.FECHA
+;
+GO 
