@@ -39,40 +39,61 @@ ORDER BY ID_TIEMPO ASC
 --(seria hacer una insercion de la tabla SELECT_ASTERISCO.Sucursal  a la tabla SELECT_ASTERISCO_BI.BI_SUCURSAL)
 
 ---DIMENSION CLIENTE
----primero crear la tabla BI_Cliente
----Seria hacer una insercion de la tabla Cliente
----Agregar cliente y edad 
+
+CREATE TABLE [SELECT_ASTERISCO_BI].[BI_Cliente] (
+	[ID_CLIENTE] [decimal](18, 0) NOT NULL,
+	[CLIENTE_APELLIDO] [nvarchar](255) NULL,
+	[CLIENTE_NOMBRE] [nvarchar](255) NULL,
+	[CLIENTE_DIRECCION] [nvarchar](255) NULL,
+	[CLIENTE_DNI] [decimal](18, 0) NULL,
+	[CLIENTE_FECHA_NAC] [datetime2](3) NULL,
+    [CLIENTE_MAIL] [nvarchar](255) NULL,
+    [CLIENTE_TELEFONO] [decimal](18,0) NULL,
+    [EDAD] [decimal](18, 0) NULL ,
+    [SEXO] [nvarchar](255) NULL
+	CONSTRAINT [PK_Cliente] PRIMARY KEY ( [ID_CLIENTE] ASC )
+)
+;
+
 INSERT INTO [SELECT_ASTERISCO_BI].[BI_Cliente] ([CLIENTE_ID] ,[CLIENTE_APELLIDO], [CLIENTE_NOMBRE], [CLIENTE_DIRECCION], [CLIENTE_DNI],[CLIENTE_FECHA_NACIMIENTO], [CLIENTE_MAIL],[CLIENTE_TELEFONO],[CLIENTE_EDAD],[CLIENTE_SEXO]) 
 SELECT *, DATEDIFF (YEAR, CLIENTE_FECHA_NACIMIENTO , GETDATE()) AS CLIENTE_EDAD , 
        NULL AS CLIENTE_SEXO 
 	   FROM [GD1C2021].[SELECT_ASTERISCO].[Cliente]
 
 
+
 ---DIMENSION PLACA_DE_VIDEO
 ---(seria hacer una insercion de la tabla SELECT_ASTERISCO.PlacaVideo  a la tabla SELECT_ASTERISCO_BI.BI_SUCURSAL)
 
----DIMENSION FABRICANTE
----(Esta tabla no existe en el modelo relacional pero el ayudante dijo que hay que modelarla)
 
----seria hacer un CREATE TABLE BI_FABRICANTE
+---DIMENSION FABRICANTE
+CREATE TABLE [SELECT_ASTERISCO_BI].[BI_Fabricante] (
+	[ID_FABRICANTE]  [decimal](18, 0) NOT NULL,
+	[FABRICANTE_NOMBRE] [nvarchar](255) NULL 
+	CONSTRAINT [PK_Fabricante] PRIMARY KEY ( [ID_FABRICANTE] ASC )
+);
+
+
 
 ---DIMENSION ACCESORIO
----(seria hacer una seria hacer una insercion de la tabla SELECT_ASTERISCO.Accesorio  a la tabla SELECT_ASTERISCO_BI.BI_Accesorio)
+---(seria hacer una insercion de la tabla SELECT_ASTERISCO.Accesorio  a la tabla SELECT_ASTERISCO_BI.BI_Accesorio)
 
 ---DIMENSION MEMORIA_RAM
----(seria hacer una seria hacer una insercion de la tabla SELECT_ASTERISCO.Memoria  a la tabla SELECT_ASTERISCO_BI.BI_Memoria_RAM)
+---(seria hacer una insercion de la tabla SELECT_ASTERISCO.Memoria  a la tabla SELECT_ASTERISCO_BI.BI_Memoria_RAM)
 
 ---DIMENSION MOTHERBOARD
----(seria hacer una seria hacer una insercion de la tabla SELECT_ASTERISCO.Motherboard  a la tabla SELECT_ASTERISCO_BI.BI_Motherboard)
+---(seria hacer una insercion de la tabla SELECT_ASTERISCO.Motherboard  a la tabla SELECT_ASTERISCO_BI.BI_Motherboard)
 
 ---DIMENSION PROCESADOR
----(seria hacer una seria hacer una insercion de la tabla SELECT_ASTERISCO.Microprocesadores  a la tabla SELECT_ASTERISCO_BI.BI_Procesador)
+---(sseria hacer una insercion de la tabla SELECT_ASTERISCO.Microprocesadores  a la tabla SELECT_ASTERISCO_BI.BI_Procesador)
 
 ---DIMENSION DISCO RIGIDO
----(seria hacer una seria hacer una insercion de la tabla SELECT_ASTERISCO.DiscoRigido  a la tabla SELECT_ASTERISCO_BI.BI_Disco_Rigido)
+---(seria hacer una insercion de la tabla SELECT_ASTERISCO.DiscoRigido  a la tabla SELECT_ASTERISCO_BI.BI_Disco_Rigido)
 
 ---DIMENSION CODIGO DE LA PC
----(seria hacer una seria hacer una insercion de la tabla SELECT_ASTERISCO.PC  a la tabla SELECT_ASTERISCO_BI.BI_Codigo_de_la_PC)
+---(seria hacer una insercion de la tabla SELECT_ASTERISCO.PC  a la tabla SELECT_ASTERISCO_BI.BI_Codigo_de_la_PC)
 
 ---TABLA DE HECHOS
 ---(Seria un gran INSERT a la tabla BI_Compra_y_venta_de_PC)
+//TODO
+---falta definir estos campos...
