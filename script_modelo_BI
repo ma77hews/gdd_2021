@@ -4,11 +4,18 @@
 
 --CREAR ESQUEMA SELECT_ASTERISCO_BI
 
----(hacer el script para crear el esquema SELECT_ASTERISCO_BI)
+CREATE SCHEMA [SELECT_ASTERISCO_BI]
+GO
+
 
 ---DIMENSION TIEMPO----
 
----primero hacer un CREATE de la tabla BI_TIEMPO. ANIO y MES deben ser INT y no DATE para que funcione la formula
+CREATE TABLE [SELECT_ASTERISCO_BI].[BI_Tiempo] (
+	[ID_TIEMPO] [decimal](18, 0) NOT NULL,
+	[ANIO] [decimal](18, 0) NOT NULL,
+        [MES] [decimal](18, 0) NOT NULL,
+	CONSTRAINT [PK_Tiempo] PRIMARY KEY ([ID_TIEMPO] ASC )
+);
 
 INSERT INTO [SELECT_ASTERISCO_BI].[BI_Tiempo] ([ID_TIEMPO], [ANIO] , [MES])
 
@@ -25,6 +32,7 @@ FROM [GD1C2021].[SELECT_ASTERISCO].[COMPRA]
 )A
 
 ORDER BY ID_TIEMPO ASC 
+
 
 ---DIMENSION SUCURSAL
 
